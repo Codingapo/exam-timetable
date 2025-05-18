@@ -91,12 +91,32 @@
         .swal2-confirm {
             background-color: #003087 !important;
         }
-        /* Responsive Styles */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
+        .flex-s {
+            display: grid;
+            justify-content: center;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+        }
+        .app-links img {
+            width: 30px;
+            height: 30px;
+            margin-right: 8px;
+        }
+        .app-links a {
+            display: inline-flex;
+            align-items: center;
+            margin: 0 10px;
+            color: #ffffff;
+            text-decoration: underline;
+        }
         @media (max-width: 640px) {
+            .flex-s {
+                grid-template-columns: 1fr;
+            }
             .madrid-title {
                 font-size: 1.5rem;
             }
@@ -125,6 +145,13 @@
                 width: 90% !important;
                 font-size: 12px !important;
             }
+            .app-links img {
+                width: 25px;
+                height: 25px;
+            }
+            .app-links a {
+                font-size: 0.875rem;
+            }
         }
         @media (max-width: 400px) {
             .madrid-title {
@@ -141,6 +168,13 @@
                 font-size: 0.8rem;
                 padding: 0.4rem;
             }
+            .app-links img {
+                width: 20px;
+                height: 20px;
+            }
+            .app-links a {
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -156,23 +190,25 @@
         <div class="bg-white p-8 rounded-lg shadow-lg mb-8 card animate__animated animate__fadeInUp">
             <h1 class="text-4xl font-bold text-center mb-8 madrid-title sm:text-3xl">Exam Timetable Generator</h1>
 
-            <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 card animate__animated animate__fadeInUp animate__delay-1s">
-                <h2 class="text-2xl font-semibold text-blue-700 mb-4 sm:text-xl">Your Name</h2>
-                <input id="studentName" type="text" placeholder="Enter your name" class="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
+            <div class="flex-s">
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 card animate__animated animate__fadeInUp animate__delay-1s">
+                    <h2 class="text-2xl font-semibold text-blue-700 mb-4 sm:text-xl">Your Name</h2>
+                    <input id="studentName" type="text" placeholder="Enter your name" class="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
 
-            <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 card animate__animated animate__fadeInUp animate__delay-2s">
-                <h2 class="text-2xl font-semibold text-blue-700 mb-4 sm:text-xl">Preferred Study Time</h2>
-                <select id="studyTime" class="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="saveStudyTime()">
-                    <option value="morning">Morning</option>
-                    <option value="afternoon">Afternoon</option>
-                    <option value="lateNight">Late Night</option>
-                    <option value="morningAndAfternoon">Morning and Afternoon</option>
-                    <option value="morningAndNight">Morning and Night</option>
-                    <option value="afternoonAndNight">Afternoon and Night</option>
-                    <option value="anytime">Anytime</option>
-                </select>
-                <div id="recommendation" class="recommendation"></div>
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 card animate__animated animate__fadeInUp animate__delay-2s">
+                    <h2 class="text-2xl font-semibold text-blue-700 mb-4 sm:text-xl">Preferred Study Time</h2>
+                    <select id="studyTime" class="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="saveStudyTime()">
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="lateNight">Late Night</option>
+                        <option value="morningAndAfternoon">Morning and Afternoon</option>
+                        <option value="morningAndNight">Morning and Night</option>
+                        <option value="afternoonAndNight">Afternoon and Night</option>
+                        <option value="anytime">Anytime</option>
+                    </select>
+                    <div id="recommendation" class="recommendation"></div>
+                </div>
             </div>
 
             <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 card animate__animated animate__fadeInUp animate__delay-3s">
@@ -214,429 +250,18 @@
     <footer class="footer-bg text-white text-center p-4 mt-8">
         <p>Enhanced by TGA. Originally created by Dokodela, Mr Chauke.</p>
         <p>For more information, contact Dokodela, Mr Chauke via WhatsApp at <a href="https://wa.me/27660688265" class="underline hover:text-blue-300">+27 66 068 8265</a>.</p>
+        <div class="app-links mt-2">
+            <a id="iphoneLink" href="https://wisestudents.site/secured-login" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="iPhone Logo"> iPhone App
+            </a>
+            <a id="androidLink" href="https://wisestudents.site/downloads/WiseStudents.apk" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg" alt="Android Logo"> Android App
+            </a>
+        </div>
     </footer>
 
     <script>
-        let exams = [];
-
-        function addExam() {
-            const module = document.getElementById('module').value.trim();
-            const examDate = document.getElementById('examDate').value;
-            const yearMark = parseFloat(document.getElementById('yearMark').value);
-            const desiredMark = parseFloat(document.getElementById('desiredMark').value);
-            const studyTime = document.getElementById('studyTime').value;
-
-            if (!module || !examDate || isNaN(yearMark) || yearMark < 0 || yearMark > 100 || 
-                isNaN(desiredMark) || desiredMark < 0 || desiredMark > 100) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Input',
-                    text: 'Please fill all fields correctly. Year Mark and Desired Final Mark must be between 0 and 100.',
-                    confirmButtonColor: '#003087'
-                });
-                return;
-            }
-
-            exams.push({ module, examDate, yearMark, desiredMark });
-            localStorage.setItem('studyTime', studyTime);
-            recommendStudyTime();
-            updateTable();
-            clearForm();
-            Swal.fire({
-                icon: 'success',
-                title: 'Exam Added',
-                text: 'Exam has been successfully added!',
-                confirmButtonColor: '#003087',
-                timer: 1500,
-                showConfirmButton: false
-            });
-        }
-
-        function clearForm() {
-            document.getElementById('module').value = '';
-            document.getElementById('examDate').value = '';
-            document.getElementById('yearMark').value = '';
-            document.getElementById('desiredMark').value = '';
-        }
-
-        function calculateRequiredExamMark(yearMark, desiredMark) {
-            let required = (desiredMark - (yearMark * 0.60)) / 0.40;
-            required = Math.max(required, 40);
-            const totalMark = (yearMark * 0.60) + (required * 0.40);
-            if (totalMark < desiredMark) {
-                return { value: required, possible: false };
-            }
-            return { value: Math.ceil(required), possible: true };
-        }
-
-        function updateTable() {
-            const tbody = document.getElementById('examTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            exams.forEach((exam, index) => {
-                const result = calculateRequiredExamMark(exam.yearMark, exam.desiredMark);
-                const requiredMark = result.value;
-                const isPossible = result.possible;
-                const row = document.createElement('tr');
-                row.className = 'animate__animated animate__fadeIn';
-                row.innerHTML = `
-                    <td class="border p-3">${exam.module}</td>
-                    <td class="border p-3">${exam.examDate}</td>
-                    <td class="border p-3">${exam.yearMark}</td>
-                    <td class="border p-3">${exam.desiredMark}</td>
-                    <td class="border p-3">${requiredMark}${!isPossible || requiredMark > 100 ? ' (Not Possible)' : ''}</td>
-                    <td class="border p-3">
-                        <button onclick="deleteExam(${index})" class="bg-red-500 text-white p-1 rounded hover:bg-red-600 text-sm">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function deleteExam(index) {
-            exams.splice(index, 1);
-            recommendStudyTime();
-            updateTable();
-            Swal.fire({
-                icon: 'success',
-                title: 'Exam Deleted',
-                text: 'Exam has been successfully removed!',
-                confirmButtonColor: '#003087',
-                timer: 1500,
-                showConfirmButton: false
-            });
-        }
-
-        function saveStudyTime() {
-            const studyTime = document.getElementById('studyTime').value;
-            localStorage.setItem('studyTime', studyTime);
-            recommendStudyTime();
-            Swal.fire({
-                icon: 'success',
-                title: 'Study Time Saved',
-                text: 'Preferred study time has been saved!',
-                confirmButtonColor: '#003087',
-                timer: 1500,
-                showConfirmButton: false
-            });
-        }
-
-        function recommendStudyTime() {
-            if (exams.length === 0) {
-                document.getElementById('recommendation').textContent = '';
-                return;
-            }
-
-            const avgYearMark = exams.reduce((sum, exam) => sum + exam.yearMark, 0) / exams.length;
-            const moduleCount = exams.length;
-
-            let recommendation;
-            if (avgYearMark < 50 || moduleCount > 4) {
-                recommendation = "Recommended Study Time: Afternoon and Night (focused evening study)";
-            } else if (avgYearMark >= 70 || moduleCount <= 2) {
-                recommendation = "Recommended Study Time: Morning (early productivity)";
-            } else {
-                recommendation = "Recommended Study Time: Morning and Afternoon (balanced daytime study)";
-            }
-            document.getElementById('recommendation').textContent = recommendation;
-
-            if (!localStorage.getItem('studyTime')) {
-                localStorage.setItem('studyTime', recommendation.includes('Morning') ? 
-                    (recommendation.includes('Afternoon') ? 'morningAndAfternoon' : 'morning') : 
-                    (recommendation.includes('Night') ? 'afternoonAndNight' : 'afternoon'));
-                document.getElementById('studyTime').value = localStorage.getItem('studyTime');
-            }
-        }
-
-        function generatePDF() {
-            if (exams.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'No Exams',
-                    text: 'No exams added. Please add at least one exam.',
-                    confirmButtonColor: '#003087'
-                });
-                return;
-            }
-
-            if (!window.jspdf || !window.jspdf.jsPDF) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'PDF Library Error',
-                    text: 'Failed to load PDF library. Please try again later.',
-                    confirmButtonColor: '#003087'
-                });
-                return;
-            }
-
-            let studentName = document.getElementById('studentName').value.trim();
-            if (!studentName) studentName = "Student";
-
-            const studyTime = localStorage.getItem('studyTime') || 'morning';
-            let timeSlots;
-            const allTimeSlots = ["07:00-09:00", "09:30-11:30", "12:00-14:00", "14:30-16:30", "17:00-19:00", "19:30-21:30", "22:00-00:00"];
-            switch (studyTime) {
-                case 'morning':
-                    timeSlots = ["07:00-09:00", "09:30-11:30"];
-                    break;
-                case 'afternoon':
-                    timeSlots = ["12:00-14:00", "14:30-16:30"];
-                    break;
-                case 'lateNight':
-                    timeSlots = ["19:30-21:30", "22:00-00:00"];
-                    break;
-                case 'morningAndAfternoon':
-                    timeSlots = ["07:00-09:00", "09:30-11:30", "12:00-14:00", "14:30-16:30"];
-                    break;
-                case 'morningAndNight':
-                    timeSlots = ["07:00-09:00", "09:30-11:30", "19:30-21:30", "22:00-00:00"];
-                    break;
-                case 'afternoonAndNight':
-                    timeSlots = ["12:00-14:00", "14:30-16:30", "19:30-21:30", "22:00-00:00"];
-                    break;
-                case 'anytime':
-                    timeSlots = allTimeSlots;
-                    break;
-                default:
-                    timeSlots = ["07:00-09:00", "09:30-11:30"];
-            }
-
-            const timeSlotMap = {};
-            timeSlots.forEach((slot, index) => {
-                const letter = String.fromCharCode(65 + index);
-                timeSlotMap[slot] = letter;
-            });
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            doc.setFont("times", "normal");
-            doc.setFontSize(16);
-            doc.setTextColor(0, 51, 102);
-            doc.setFillColor(219, 234, 254);
-            doc.rect(10, 10, 190, 20, "F");
-            doc.text("Weekly Exam Study Timetable", 105, 25, { align: "center" });
-
-            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-            doc.setFontSize(14);
-            doc.setFillColor(255, 255, 255);
-            doc.rect(10, 40, 190, 12, "F");
-            doc.setTextColor(0, 0, 0);
-            doc.text("Time", 12, 48);
-            const colWidth = 26;
-            days.forEach((day, i) => {
-                doc.text(day, 30 + i * colWidth, 48);
-            });
-
-            let timetable = {};
-            let modulesPerDay = {};
-            let sessionsPerModule = {};
-            exams.forEach(exam => {
-                sessionsPerModule[exam.module] = 0;
-            });
-            days.forEach(day => {
-                modulesPerDay[day] = new Set();
-                timeSlots.forEach(time => {
-                    if (!timetable[time]) timetable[time] = {};
-                    timetable[time][day] = "";
-                });
-            });
-
-            exams.forEach(exam => {
-                for (let i = 0; i < 4; i++) {
-                    let assigned = false;
-                    let attempts = 0;
-                    const maxAttempts = 50;
-                    while (!assigned && attempts < maxAttempts) {
-                        const day = days[Math.floor(Math.random() * days.length)];
-                        const time = timeSlots[Math.floor(Math.random() * timeSlots.length)];
-                        if (!timetable[time][day] && !modulesPerDay[day].has(exam.module)) {
-                            timetable[time][day] = exam.module;
-                            modulesPerDay[day].add(exam.module);
-                            sessionsPerModule[exam.module]++;
-                            assigned = true;
-                        }
-                        attempts++;
-                    }
-                }
-                for (let i = 0; i < 3; i++) {
-                    let assigned = false;
-                    let attempts = 0;
-                    const maxAttempts = 50;
-                    while (!assigned && attempts < maxAttempts) {
-                        const day = days[Math.floor(Math.random() * days.length)];
-                        const time = timeSlots[Math.floor(Math.random() * timeSlots.length)];
-                        if (!timetable[time][day] && !modulesPerDay[day].has(exam.module)) {
-                            timetable[time][day] = exam.module;
-                            modulesPerDay[day].add(exam.module);
-                            sessionsPerModule[exam.module]++;
-                            assignedcomputationally expensive but necessary for security reasons, I'll include it to ensure the module name is properly escaped.
-            function escapeHtml(unsafe) {
-                return unsafe
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            }
-
-            days.forEach(day => {
-                if (modulesPerDay[day].size < 2 && exams.length >= 2) {
-                    let additionalModules = new Set([...exams].map(ex => ex.module));
-                    modulesPerDay[day].forEach(mod => additionalModules.delete(mod));
-                    const additionalModulesArray = Array.from(additionalModules);
-                    let modulesToAdd = 2 - modulesPerDay[day].size;
-                    for (let i = 0; i < modulesToAdd && i < additionalModulesArray.length; i++) {
-                        let assigned = false;
-                        let attempts = 0;
-                        const maxAttempts = 50;
-                        while (!assigned && attempts < maxAttempts) {
-                            const time = timeSlots[Math.floor(Math.random() * timeSlots.length)];
-                            if (!timetable[time][day] && !modulesPerDay[day].has(additionalModulesArray[i])) {
-                                timetable[time][day] = additionalModulesArray[i];
-                                modulesPerDay[day].add(additionalModulesArray[i]);
-                                sessionsPerModule[additionalModulesArray[i]]++;
-                                assigned = true;
-                            }
-                            attempts++;
-                        }
-                    }
-                }
-            });
-
-            let y = 52;
-            timeSlots.forEach(time => {
-                const letter = timeSlotMap[time];
-                doc.setFillColor(255, 255, 255);
-                doc.rect(10, y, 190, 14, "F");
-                doc.setTextColor(0, 0, 0);
-                doc.setFontSize(14);
-                doc.text(letter, 12, y + 10);
-                days.forEach((day, i) => {
-                    const text = timetable[time][day];
-                    if (text) {
-                        doc.setFillColor(240, 240, 240);
-                        doc.rect(30 + i * colWidth - 2, y, colWidth, 14, "F");
-                        const wrappedText = doc.splitTextToSize(text, colWidth - 4);
-                        doc.text(wrappedText, 30 + i * colWidth, y + 10, { maxWidth: colWidth - 4 });
-                    }
-                    doc.setDrawColor(0, 0, 0);
-                    doc.rect(30 + i * colWidth - 2, y, colWidth, 14);
-                });
-                doc.setDrawColor(0, 0, 0);
-                doc.rect(10, y, 190, 14);
-                y += 14;
-            });
-
-            const quotes = [
-                "Success is the sum of small efforts, repeated day in and day out. – Robert Collier",
-                "The future belongs to those who believe in the beauty of their dreams. – Eleanor Roosevelt",
-                "It always seems impossible until it’s done. – Nelson Mandela",
-                "You don’t have to be great to start, but you have to start to be great. – Zig Ziglar",
-                "The only way to do great work is to love what you do. – Steve Jobs"
-            ];
-            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-            y += 10;
-            doc.setFontSize(12);
-            doc.setTextColor(0, 51, 102);
-            const quoteLines = doc.splitTextToSize(randomQuote, 180);
-            quoteLines.forEach((line, index) => {
-                doc.text(line, 105, y + (index * 5), { align: "center" });
-            });
-            y += quoteLines.length * 5 + 10;
-
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(14);
-            doc.text("Time Slot Key", 105, y, { align: "center" });
-            y += 10;
-
-            doc.setFontSize(12);
-            doc.setTextColor(0, 51, 102);
-            timeSlots.forEach(time => {
-                const letter = timeSlotMap[time];
-                doc.text(`${letter}: ${time}`, 105, y, { align: "center" });
-                y += 6;
-            });
-
-            y += 5;
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(14);
-            doc.text("Module Summary", 105, y, { align: "center" });
-            y += 10;
-
-            doc.setFillColor(219, 234, 254);
-            doc.rect(10, y, 190, 8, "F");
-            doc.setFontSize(12);
-            doc.setTextColor(0, 51, 102);
-            doc.text("Module", 12, y + 6);
-            doc.text("Sessions/Week", 50, y + 6);
-            doc.text("Hours/Week", 90, y + 6);
-            doc.text("Exam Date", 130, y + 6);
-            y += 8;
-
-            doc.setTextColor(0, 0, 0);
-            exams.forEach(exam => {
-                const sessions = sessionsPerModule[exam.module] || 0;
-                const hours = sessions * 2;
-                doc.setFillColor(240, 240, 240);
-                doc.rect(10, y, 190, 8, "F");
-                doc.text(exam.module, 12, y + 6);
-                doc.text(sessions.toString(), 50, y + 6);
-                doc.text(hours.toString(), 90, y + 6);
-                doc.text(exam.examDate, 130, y + 6);
-                doc.rect(10, y, 190, 8);
-                doc.line(48, y, 48, y + 8);
-                doc.line(88, y, 88, y + 8);
-                doc.line(128, y, 128, y + 8);
-                y += 8;
-            });
-
-            y += 10;
-            doc.setFontSize(12);
-            const currentDate = new Date().toLocaleString("en-ZA", { timeZone: "Africa/Johannesburg", dateStyle: "full", timeStyle: "short" });
-            doc.text(`Generated by ${studentName} on ${currentDate}`, 105, y, { align: "center" });
-
-            doc.save("weekly_exam_timetable.pdf");
-            Swal.fire({
-                icon: 'success',
-                title: 'PDF Generated',
-                text: 'Your timetable has been successfully generated and downloaded!',
-                confirmButtonColor: '#003087',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        }
-
-        function generatePDFWithLoader() {
-            const loader = document.getElementById('loader');
-            loader.style.display = 'block';
-            setTimeout(() => {
-                try {
-                    generatePDF();
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'PDF Generation Failed',
-                        text: 'An error occurred while generating the PDF. Please try again.',
-                        confirmButtonColor: '#003087'
-                    });
-                    console.error('PDF generation error:', error);
-                }
-                loader.style.display = 'none';
-            }, 1000);
-        }
-
-        function contactDokodela() {
-            window.open('https://wa.me/27660688265', '_blank');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedStudyTime = localStorage.getItem('studyTime');
-            if (savedStudyTime) {
-                document.getElementById('studyTime').value = savedStudyTime;
-            }
-            recommendStudyTime();
-        });
+      function _0x4799(_0x468fc6,_0x480b5b){const _0x5ed336=_0x5ed3();return _0x4799=function(_0x47997f,_0x5e6b1d){_0x47997f=_0x47997f-0xc1;let _0x36fd2a=_0x5ed336[_0x47997f];return _0x36fd2a;},_0x4799(_0x468fc6,_0x480b5b);}const _0x1b903f=_0x4799;(function(_0x48fbbe,_0x50cd10){const _0x251c9c=_0x4799,_0x1b0d9e=_0x48fbbe();while(!![]){try{const _0x378b4a=-parseInt(_0x251c9c(0xf3))/0x1*(parseInt(_0x251c9c(0x145))/0x2)+parseInt(_0x251c9c(0x138))/0x3+parseInt(_0x251c9c(0xfd))/0x4+-parseInt(_0x251c9c(0x13a))/0x5+parseInt(_0x251c9c(0x149))/0x6*(parseInt(_0x251c9c(0x13e))/0x7)+parseInt(_0x251c9c(0x146))/0x8+-parseInt(_0x251c9c(0x10b))/0x9*(parseInt(_0x251c9c(0x141))/0xa);if(_0x378b4a===_0x50cd10)break;else _0x1b0d9e['push'](_0x1b0d9e['shift']());}catch(_0x3369e1){_0x1b0d9e['push'](_0x1b0d9e['shift']());}}}(_0x5ed3,0x87e60));let exams=[];function adjustAppLinks(){const _0x6ab475=_0x4799,_0x1e434f=/Android/i[_0x6ab475(0x12c)](navigator[_0x6ab475(0x10f)]),_0x3729ec=document[_0x6ab475(0xcb)](_0x6ab475(0xe0)),_0x5dd882=document[_0x6ab475(0xcb)](_0x6ab475(0xd4));_0x1e434f?(_0x5dd882[_0x6ab475(0xd6)]['display']='inline-flex',_0x3729ec[_0x6ab475(0xd6)]['display']=_0x6ab475(0xec)):(_0x5dd882[_0x6ab475(0xd6)][_0x6ab475(0xed)]=_0x6ab475(0x109),_0x3729ec[_0x6ab475(0xd6)][_0x6ab475(0xed)]='inline-flex');}function addExam(){const _0x39f37b=_0x4799,_0x4f5f3e=document['getElementById']('module')[_0x39f37b(0x136)][_0x39f37b(0xd5)](),_0x44c8d6=document[_0x39f37b(0xcb)](_0x39f37b(0xee))[_0x39f37b(0x136)],_0x3a9d74=parseFloat(document['getElementById'](_0x39f37b(0xdd))['value']),_0x5418c3=parseFloat(document['getElementById']('desiredMark')[_0x39f37b(0x136)]),_0x3367af=document[_0x39f37b(0xcb)]('studyTime')[_0x39f37b(0x136)];if(!_0x4f5f3e||!_0x44c8d6||isNaN(_0x3a9d74)||_0x3a9d74<0x0||_0x3a9d74>0x64||isNaN(_0x5418c3)||_0x5418c3<0x0||_0x5418c3>0x64){Swal[_0x39f37b(0xfe)]({'icon':_0x39f37b(0x123),'title':'Invalid\x20Input','text':_0x39f37b(0x122),'confirmButtonColor':'#003087'});return;}exams['push']({'module':_0x4f5f3e,'examDate':_0x44c8d6,'yearMark':_0x3a9d74,'desiredMark':_0x5418c3}),localStorage[_0x39f37b(0x12b)](_0x39f37b(0x10a),_0x3367af),recommendStudyTime(),updateTable(),clearForm(),Swal[_0x39f37b(0xfe)]({'icon':'success','title':_0x39f37b(0x12a),'text':'Exam\x20has\x20been\x20successfully\x20added!','confirmButtonColor':'#003087','timer':0x5dc,'showConfirmButton':![]});}function clearForm(){const _0x4fb0ff=_0x4799;document[_0x4fb0ff(0xcb)](_0x4fb0ff(0x128))[_0x4fb0ff(0x136)]='',document[_0x4fb0ff(0xcb)](_0x4fb0ff(0xee))[_0x4fb0ff(0x136)]='',document['getElementById'](_0x4fb0ff(0xdd))[_0x4fb0ff(0x136)]='',document['getElementById']('desiredMark')['value']='';}function calculateRequiredExamMark(_0x54c454,_0x3a9edc){const _0x470fde=_0x4799;let _0x1a6e2a=(_0x3a9edc-_0x54c454*0.6)/0.4;_0x1a6e2a=Math[_0x470fde(0xc5)](_0x1a6e2a,0x28);const _0x2b638a=_0x54c454*0.6+_0x1a6e2a*0.4;if(_0x2b638a<_0x3a9edc)return{'value':_0x1a6e2a,'possible':![]};return{'value':Math[_0x470fde(0x116)](_0x1a6e2a),'possible':!![]};}function updateTable(){const _0x96b646=_0x4799,_0x45dc99=document['getElementById']('examTableBody');if(!_0x45dc99)return;_0x45dc99[_0x96b646(0x101)]='',exams[_0x96b646(0x11b)]((_0x366629,_0x43e423)=>{const _0x464e98=_0x96b646,_0x20a33f=calculateRequiredExamMark(_0x366629[_0x464e98(0xdd)],_0x366629[_0x464e98(0xe2)]),_0x109dbc=_0x20a33f[_0x464e98(0x136)],_0x3a2093=_0x20a33f[_0x464e98(0x114)],_0x796e10=document[_0x464e98(0x144)]('tr');_0x796e10[_0x464e98(0x14c)]=_0x464e98(0x113),_0x796e10[_0x464e98(0x101)]=_0x464e98(0xf5)+_0x366629[_0x464e98(0x128)]+_0x464e98(0xc8)+_0x366629[_0x464e98(0xee)]+_0x464e98(0xc8)+_0x366629[_0x464e98(0xdd)]+_0x464e98(0xc8)+_0x366629[_0x464e98(0xe2)]+_0x464e98(0xc8)+_0x109dbc+(!_0x3a2093||_0x109dbc>0x64?_0x464e98(0x13b):'')+_0x464e98(0xd1)+_0x43e423+')\x22\x20class=\x22bg-red-500\x20text-white\x20p-1\x20rounded\x20hover:bg-red-600\x20text-sm\x22>Delete</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</td>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20',_0x45dc99[_0x464e98(0x10e)](_0x796e10);});}function deleteExam(_0x2164c6){const _0xf2c043=_0x4799;exams[_0xf2c043(0xe7)](_0x2164c6,0x1),recommendStudyTime(),updateTable(),Swal['fire']({'icon':'success','title':_0xf2c043(0x107),'text':'Exam\x20has\x20been\x20successfully\x20removed!','confirmButtonColor':_0xf2c043(0xc7),'timer':0x5dc,'showConfirmButton':![]});}function saveStudyTime(){const _0x108da1=_0x4799,_0x1d6b13=document['getElementById'](_0x108da1(0x10a))[_0x108da1(0x136)];localStorage[_0x108da1(0x12b)](_0x108da1(0x10a),_0x1d6b13),recommendStudyTime(),Swal['fire']({'icon':_0x108da1(0xdf),'title':'Study\x20Time\x20Saved','text':'Preferred\x20study\x20time\x20has\x20been\x20saved!','confirmButtonColor':_0x108da1(0xc7),'timer':0x5dc,'showConfirmButton':![]});}function recommendStudyTime(){const _0x19a3ca=_0x4799;if(exams[_0x19a3ca(0x121)]===0x0){document[_0x19a3ca(0xcb)](_0x19a3ca(0x106))[_0x19a3ca(0x11c)]='';return;}const _0x19da5b=exams[_0x19a3ca(0xf1)]((_0x13235f,_0x53586d)=>_0x13235f+_0x53586d[_0x19a3ca(0xdd)],0x0)/exams[_0x19a3ca(0x121)],_0x1cde0a=exams[_0x19a3ca(0x121)];let _0x120fbf;if(_0x19da5b<0x32||_0x1cde0a>0x4)_0x120fbf='Recommended\x20Study\x20Time:\x20Afternoon\x20and\x20Night\x20(focused\x20evening\x20study)';else _0x19da5b>=0x46||_0x1cde0a<=0x2?_0x120fbf=_0x19a3ca(0xde):_0x120fbf='Recommended\x20Study\x20Time:\x20Morning\x20and\x20Afternoon\x20(balanced\x20daytime\x20study)';document[_0x19a3ca(0xcb)]('recommendation')[_0x19a3ca(0x11c)]=_0x120fbf,!localStorage[_0x19a3ca(0x105)](_0x19a3ca(0x10a))&&(localStorage[_0x19a3ca(0x12b)](_0x19a3ca(0x10a),_0x120fbf['includes'](_0x19a3ca(0xeb))?_0x120fbf[_0x19a3ca(0xea)](_0x19a3ca(0xf4))?_0x19a3ca(0xcd):'morning':_0x120fbf[_0x19a3ca(0xea)]('Night')?'afternoonAndNight':'afternoon'),document[_0x19a3ca(0xcb)]('studyTime')[_0x19a3ca(0x136)]=localStorage[_0x19a3ca(0x105)](_0x19a3ca(0x10a)));}function escapeHtml(_0x225f9f){const _0x5f0e2d=_0x4799;return _0x225f9f['replace'](/&/g,_0x5f0e2d(0xcc))[_0x5f0e2d(0x12d)](/</g,_0x5f0e2d(0x120))['replace'](/>/g,'&gt;')[_0x5f0e2d(0x12d)](/"/g,_0x5f0e2d(0x147))[_0x5f0e2d(0x12d)](/'/g,_0x5f0e2d(0xcf));}function generatePDF(){const _0x1d2308=_0x4799;if(exams[_0x1d2308(0x121)]===0x0){Swal['fire']({'icon':'warning','title':_0x1d2308(0xc3),'text':_0x1d2308(0xe3),'confirmButtonColor':_0x1d2308(0xc7)});return;}if(!window['jspdf']||!window[_0x1d2308(0xd9)][_0x1d2308(0xdc)]){Swal[_0x1d2308(0xfe)]({'icon':'error','title':'PDF\x20Library\x20Error','text':_0x1d2308(0x132),'confirmButtonColor':_0x1d2308(0xc7)});return;}let _0x3b31ec=document[_0x1d2308(0xcb)](_0x1d2308(0x143))['value'][_0x1d2308(0xd5)]();if(!_0x3b31ec)_0x3b31ec='Student';const _0x1c935d=localStorage['getItem']('studyTime')||_0x1d2308(0x148);let _0xc6e350;const _0x779f7e=[_0x1d2308(0x103),_0x1d2308(0xf0),_0x1d2308(0x12f),_0x1d2308(0x11d),_0x1d2308(0xda),_0x1d2308(0xd3),'22:00-00:00'];switch(_0x1c935d){case _0x1d2308(0x148):_0xc6e350=[_0x1d2308(0x103),_0x1d2308(0xf0)];break;case _0x1d2308(0xce):_0xc6e350=['12:00-14:00','14:30-16:30'];break;case _0x1d2308(0x127):_0xc6e350=['19:30-21:30',_0x1d2308(0xfb)];break;case _0x1d2308(0xcd):_0xc6e350=[_0x1d2308(0x103),_0x1d2308(0xf0),'12:00-14:00',_0x1d2308(0x11d)];break;case _0x1d2308(0xd7):_0xc6e350=[_0x1d2308(0x103),_0x1d2308(0xf0),_0x1d2308(0xd3),_0x1d2308(0xfb)];break;case _0x1d2308(0xc4):_0xc6e350=[_0x1d2308(0x12f),_0x1d2308(0x11d),_0x1d2308(0xd3),_0x1d2308(0xfb)];break;case _0x1d2308(0x108):_0xc6e350=_0x779f7e;break;default:_0xc6e350=[_0x1d2308(0x103),'09:30-11:30'];}const _0x4b6059={};_0xc6e350[_0x1d2308(0x11b)]((_0x35aed7,_0x50ff95)=>{const _0x5699a7=_0x1d2308,_0x1b8121=String[_0x5699a7(0x133)](0x41+_0x50ff95);_0x4b6059[_0x35aed7]=_0x1b8121;});const _0x511297=[_0x1d2308(0x11f),'Tue',_0x1d2308(0x13c),_0x1d2308(0x14d),_0x1d2308(0x131),'Sat',_0x1d2308(0x140)];let _0x458158={},_0x31e534={},_0x35444a={};exams[_0x1d2308(0x11b)](_0xbefdc1=>{const _0x612873=_0x1d2308;_0x35444a[_0xbefdc1[_0x612873(0x128)]]=0x0;}),_0x511297[_0x1d2308(0x11b)](_0x21e716=>{_0x31e534[_0x21e716]=new Set(),_0xc6e350['forEach'](_0x5d91e1=>{if(!_0x458158[_0x5d91e1])_0x458158[_0x5d91e1]={};_0x458158[_0x5d91e1][_0x21e716]='';});}),exams['forEach'](_0x3b119c=>{const _0x47ad3a=_0x1d2308;for(let _0x23a882=0x0;_0x23a882<0x4;_0x23a882++){let _0x25f521=![],_0x199f4e=0x0;const _0x12e1b6=0x32;while(!_0x25f521&&_0x199f4e<_0x12e1b6){const _0x2587bf=_0x511297[Math[_0x47ad3a(0x10c)](Math[_0x47ad3a(0xca)]()*_0x511297[_0x47ad3a(0x121)])],_0x266fbb=_0xc6e350[Math[_0x47ad3a(0x10c)](Math[_0x47ad3a(0xca)]()*_0xc6e350['length'])];!_0x458158[_0x266fbb][_0x2587bf]&&!_0x31e534[_0x2587bf]['has'](_0x3b119c[_0x47ad3a(0x128)])&&(_0x458158[_0x266fbb][_0x2587bf]=_0x3b119c[_0x47ad3a(0x128)],_0x31e534[_0x2587bf][_0x47ad3a(0xf8)](_0x3b119c['module']),_0x35444a[_0x3b119c[_0x47ad3a(0x128)]]++,_0x25f521=!![]),_0x199f4e++;}}for(let _0x1c3277=0x0;_0x1c3277<0x3;_0x1c3277++){let _0x22f008=![],_0x327db5=0x0;const _0x1622c0=0x32;while(!_0x22f008&&_0x327db5<_0x1622c0){const _0x13f239=_0x511297[Math[_0x47ad3a(0x10c)](Math[_0x47ad3a(0xca)]()*_0x511297[_0x47ad3a(0x121)])],_0x5194ca=_0xc6e350[Math[_0x47ad3a(0x10c)](Math[_0x47ad3a(0xca)]()*_0xc6e350[_0x47ad3a(0x121)])];!_0x458158[_0x5194ca][_0x13f239]&&!_0x31e534[_0x13f239][_0x47ad3a(0x11e)](_0x3b119c['module'])&&(_0x458158[_0x5194ca][_0x13f239]=_0x3b119c[_0x47ad3a(0x128)],_0x31e534[_0x13f239]['add'](_0x3b119c[_0x47ad3a(0x128)]),_0x35444a[_0x3b119c['module']]++,_0x22f008=!![]),_0x327db5++;}}}),_0x511297[_0x1d2308(0x11b)](_0x3ca5d4=>{const _0x178873=_0x1d2308;if(_0x31e534[_0x3ca5d4][_0x178873(0xe6)]<0x2&&exams[_0x178873(0x121)]>=0x2){let _0x48f754=new Set([...exams][_0x178873(0x12e)](_0x2e07e8=>_0x2e07e8[_0x178873(0x128)]));_0x31e534[_0x3ca5d4][_0x178873(0x11b)](_0x2ec3b7=>_0x48f754['delete'](_0x2ec3b7));const _0x232614=Array[_0x178873(0xe4)](_0x48f754);let _0x24653c=0x2-_0x31e534[_0x3ca5d4][_0x178873(0xe6)];for(let _0x1820ca=0x0;_0x1820ca<_0x24653c&&_0x1820ca<_0x232614[_0x178873(0x121)];_0x1820ca++){let _0x3e8687=![],_0x27db56=0x0;const _0x535033=0x32;while(!_0x3e8687&&_0x27db56<_0x535033){const _0xbd6c27=_0xc6e350[Math[_0x178873(0x10c)](Math['random']()*_0xc6e350[_0x178873(0x121)])];!_0x458158[_0xbd6c27][_0x3ca5d4]&&!_0x31e534[_0x3ca5d4][_0x178873(0x11e)](_0x232614[_0x1820ca])&&(_0x458158[_0xbd6c27][_0x3ca5d4]=_0x232614[_0x1820ca],_0x31e534[_0x3ca5d4][_0x178873(0xf8)](_0x232614[_0x1820ca]),_0x35444a[_0x232614[_0x1820ca]]++,_0x3e8687=!![]),_0x27db56++;}}}});const {jsPDF:_0x1ed3d9}=window['jspdf'],_0x1746e9=new _0x1ed3d9(),_0x46a977=_0x1d2308(0x100),_0x361668=0x32,_0x28afa9=0x14,_0x5db9c0=0xd2,_0x421846=(_0x5db9c0-_0x361668)/0x2;try{_0x1746e9[_0x1d2308(0xff)](_0x46a977,_0x1d2308(0x102),_0x421846,0xa,_0x361668,_0x28afa9);}catch(_0x123d6d){console['warn']('Failed\x20to\x20load\x20logo:',_0x123d6d),_0x1746e9[_0x1d2308(0xdb)](0xdb,0xea,0xfe),_0x1746e9[_0x1d2308(0x117)](_0x421846,0xa,_0x361668,_0x28afa9,'F'),_0x1746e9[_0x1d2308(0xc9)](0xa),_0x1746e9[_0x1d2308(0xf2)](0x0,0x0,0x0),_0x1746e9[_0x1d2308(0x134)]('University\x20of\x20Limpopo\x20Logo',_0x421846+0x5,0x14);}_0x1746e9[_0x1d2308(0xe9)]('times','normal'),_0x1746e9['setFontSize'](0x10),_0x1746e9[_0x1d2308(0xf2)](0x0,0x33,0x66),_0x1746e9[_0x1d2308(0xdb)](0xdb,0xea,0xfe),_0x1746e9[_0x1d2308(0x117)](0xa,0x23,0xbe,0xf,'F'),_0x1746e9[_0x1d2308(0x134)](_0x1d2308(0xd2),0x69,0x2d,{'align':_0x1d2308(0x112)}),_0x1746e9['setFontSize'](0xe),_0x1746e9['setFillColor'](0xff,0xff,0xff),_0x1746e9[_0x1d2308(0x117)](0xa,0x37,0xbe,0xc,'F'),_0x1746e9[_0x1d2308(0xf2)](0x0,0x0,0x0),_0x1746e9['text'](_0x1d2308(0xfc),0xc,0x3f);const _0x584f8e=0x28,_0x4b7859=21.43;_0x511297['forEach']((_0x5c15fa,_0x4fb24e)=>{const _0x2f624f=_0x1d2308,_0x5d7164=_0x1746e9['splitTextToSize'](_0x5c15fa,_0x4b7859-0x4);_0x1746e9[_0x2f624f(0x134)](_0x5d7164,0x32+_0x4fb24e*_0x4b7859,0x3f,{'maxWidth':_0x4b7859-0x4});});let _0x125ba3=0x43;_0xc6e350['forEach'](_0x3a2bb3=>{const _0xe37bc7=_0x1d2308,_0x5e64a0=_0x4b6059[_0x3a2bb3];_0x1746e9['setFillColor'](0xff,0xff,0xff),_0x1746e9['rect'](0xa,_0x125ba3,0xbe,0xe,'F'),_0x1746e9[_0xe37bc7(0xf2)](0x0,0x0,0x0),_0x1746e9[_0xe37bc7(0xc9)](0xc);const _0x7c8c14=_0x5e64a0+':\x20'+_0x3a2bb3,_0x434931=_0x1746e9[_0xe37bc7(0x110)](_0x7c8c14,_0x584f8e-0x4);_0x1746e9[_0xe37bc7(0x134)](_0x434931,0xc,_0x125ba3+0xa,{'maxWidth':_0x584f8e-0x4}),_0x511297['forEach']((_0x5b1cfb,_0x250980)=>{const _0x497a63=_0xe37bc7,_0x18be17=_0x458158[_0x3a2bb3][_0x5b1cfb]?escapeHtml(_0x458158[_0x3a2bb3][_0x5b1cfb]):'';if(_0x18be17){_0x1746e9[_0x497a63(0xdb)](0xf0,0xf0,0xf0),_0x1746e9[_0x497a63(0x117)](0x32+_0x250980*_0x4b7859,_0x125ba3,_0x4b7859,0xe,'F');const _0x49a99b=_0x1746e9[_0x497a63(0x110)](_0x18be17,_0x4b7859-0x4);_0x1746e9[_0x497a63(0x134)](_0x49a99b,0x32+_0x250980*_0x4b7859+_0x4b7859/0x2,_0x125ba3+0xa,{'align':_0x497a63(0x112),'maxWidth':_0x584f8e-0x4});}_0x1746e9['setDrawColor'](0x0,0x0,0x0),_0x1746e9['rect'](0x32+_0x250980*_0x4b7859,_0x125ba3,_0x4b7859,0xe);}),_0x1746e9[_0xe37bc7(0x14b)](0x0,0x0,0x0),_0x1746e9[_0xe37bc7(0x117)](0xa,_0x125ba3,0xbe,0xe),_0x125ba3+=0xe;});const _0x197bfc=[_0x1d2308(0x13d),_0x1d2308(0x14e),_0x1d2308(0xe5),_0x1d2308(0x14a),_0x1d2308(0x135),_0x1d2308(0x118),_0x1d2308(0x137),'Study\x20hard,\x20for\x20the\x20well\x20is\x20deep,\x20and\x20our\x20brains\x20are\x20shallow.\x20–\x20Richard\x20Baxter',_0x1d2308(0x139),_0x1d2308(0x111),_0x1d2308(0xe1),_0x1d2308(0xe8)],_0x57c109=_0x197bfc[Math['floor'](Math[_0x1d2308(0xca)]()*_0x197bfc[_0x1d2308(0x121)])];_0x125ba3+=0xa,_0x1746e9['setFontSize'](0xc),_0x1746e9[_0x1d2308(0xf2)](0x0,0x33,0x66);const _0xf3fa67=_0x1746e9[_0x1d2308(0x110)](_0x57c109,0xb4);_0xf3fa67[_0x1d2308(0x11b)]((_0x2ffbac,_0x1c8f77)=>{const _0x2342da=_0x1d2308;_0x1746e9['text'](_0x2ffbac,0x69,_0x125ba3+_0x1c8f77*0x5,{'align':_0x2342da(0x112)});}),_0x125ba3+=_0xf3fa67[_0x1d2308(0x121)]*0x5+0xa,_0x1746e9['setTextColor'](0x0,0x0,0x0),_0x1746e9[_0x1d2308(0xc9)](0xe),_0x1746e9[_0x1d2308(0x134)](_0x1d2308(0x126),0x69,_0x125ba3,{'align':_0x1d2308(0x112)}),_0x125ba3+=0xa,_0x1746e9[_0x1d2308(0xc9)](0xc),_0x1746e9['setTextColor'](0x0,0x33,0x66),_0xc6e350[_0x1d2308(0x11b)](_0x52a2af=>{const _0x1a24e5=_0x1d2308,_0x2c16c4=_0x4b6059[_0x52a2af];_0x1746e9[_0x1a24e5(0x134)](_0x2c16c4+':\x20'+_0x52a2af,0x69,_0x125ba3,{'align':_0x1a24e5(0x112)}),_0x125ba3+=0x6;}),_0x125ba3+=0x5,_0x1746e9[_0x1d2308(0xf2)](0x0,0x0,0x0),_0x1746e9['setFontSize'](0xe),_0x1746e9[_0x1d2308(0x134)](_0x1d2308(0x13f),0x69,_0x125ba3,{'align':_0x1d2308(0x112)}),_0x125ba3+=0xa,_0x1746e9[_0x1d2308(0xdb)](0xdb,0xea,0xfe),_0x1746e9['rect'](0xa,_0x125ba3,0xbe,0x8,'F'),_0x1746e9[_0x1d2308(0xc9)](0xc),_0x1746e9[_0x1d2308(0xf2)](0x0,0x33,0x66),_0x1746e9['text']('Module',0xc,_0x125ba3+0x6),_0x1746e9[_0x1d2308(0x134)](_0x1d2308(0xf6),0x32,_0x125ba3+0x6),_0x1746e9[_0x1d2308(0x134)](_0x1d2308(0xfa),0x5a,_0x125ba3+0x6),_0x1746e9[_0x1d2308(0x134)](_0x1d2308(0x142),0x82,_0x125ba3+0x6),_0x125ba3+=0x8,_0x1746e9[_0x1d2308(0xf2)](0x0,0x0,0x0),exams[_0x1d2308(0x11b)](_0x51afeb=>{const _0x51457f=_0x1d2308,_0x1c0699=_0x35444a[_0x51afeb['module']]||0x0,_0x5d07b4=_0x1c0699*0x2;_0x1746e9[_0x51457f(0xdb)](0xf0,0xf0,0xf0),_0x1746e9[_0x51457f(0x117)](0xa,_0x125ba3,0xbe,0x8,'F'),_0x1746e9[_0x51457f(0x134)](escapeHtml(_0x51afeb[_0x51457f(0x128)]),0xc,_0x125ba3+0x6),_0x1746e9[_0x51457f(0x134)](_0x1c0699[_0x51457f(0xf7)](),0x32,_0x125ba3+0x6),_0x1746e9['text'](_0x5d07b4[_0x51457f(0xf7)](),0x5a,_0x125ba3+0x6),_0x1746e9[_0x51457f(0x134)](_0x51afeb['examDate'],0x82,_0x125ba3+0x6),_0x1746e9[_0x51457f(0x117)](0xa,_0x125ba3,0xbe,0x8),_0x1746e9[_0x51457f(0x119)](0x30,_0x125ba3,0x30,_0x125ba3+0x8),_0x1746e9[_0x51457f(0x119)](0x58,_0x125ba3,0x58,_0x125ba3+0x8),_0x1746e9[_0x51457f(0x119)](0x80,_0x125ba3,0x80,_0x125ba3+0x8),_0x125ba3+=0x8;}),_0x125ba3+=0xa,_0x1746e9[_0x1d2308(0xc9)](0xc);const _0x3bdabe=new Date()[_0x1d2308(0x14f)](_0x1d2308(0x115),{'timeZone':_0x1d2308(0x10d),'dateStyle':'full','timeStyle':_0x1d2308(0x104)});_0x1746e9[_0x1d2308(0x134)](_0x1d2308(0x11a)+escapeHtml(_0x3b31ec)+_0x1d2308(0x125)+_0x3bdabe,0x69,_0x125ba3,{'align':_0x1d2308(0x112)}),_0x1746e9[_0x1d2308(0x129)](_0x1d2308(0x124)),Swal[_0x1d2308(0xfe)]({'icon':_0x1d2308(0xdf),'title':_0x1d2308(0xd8),'text':'Your\x20timetable\x20has\x20been\x20successfully\x20generated\x20and\x20downloaded!','confirmButtonColor':'#003087','timer':0x7d0,'showConfirmButton':![]});}function generatePDFWithLoader(){const _0x48ea08=_0x4799,_0x357a71=document[_0x48ea08(0xcb)]('loader');_0x357a71[_0x48ea08(0xd6)][_0x48ea08(0xed)]='block',setTimeout(()=>{const _0x140ac8=_0x48ea08;try{generatePDF();}catch(_0x117f01){Swal[_0x140ac8(0xfe)]({'icon':_0x140ac8(0x123),'title':_0x140ac8(0xc2),'text':_0x140ac8(0xf9),'confirmButtonColor':_0x140ac8(0xc7)}),console[_0x140ac8(0x123)](_0x140ac8(0x130),_0x117f01);}_0x357a71[_0x140ac8(0xd6)]['display']=_0x140ac8(0xec);},0x3e8);}function _0x5ed3(){const _0xe476ce=['The\x20mind\x20is\x20not\x20a\x20vessel\x20to\x20be\x20filled,\x20but\x20a\x20fire\x20to\x20be\x20kindled.\x20–\x20Plutarch','3499065OFIGlw','\x20(Not\x20Possible)','Wed','Success\x20is\x20the\x20sum\x20of\x20small\x20efforts,\x20repeated\x20day\x20in\x20and\x20day\x20out.\x20–\x20Robert\x20Collier','7McsWjm','Module\x20Summary','Sun','2090mJrbYr','Exam\x20Date','studentName','createElement','3478hvDWJa','6065176Vfzezp','&quot;','morning','3778626ZHwBkL','You\x20don’t\x20have\x20to\x20be\x20great\x20to\x20start,\x20but\x20you\x20have\x20to\x20start\x20to\x20be\x20great.\x20–\x20Zig\x20Ziglar','setDrawColor','className','Thur','The\x20future\x20belongs\x20to\x20those\x20who\x20believe\x20in\x20the\x20beauty\x20of\x20their\x20dreams.\x20–\x20Eleanor\x20Roosevelt','toLocaleString','open','PDF\x20Generation\x20Failed','No\x20Exams','afternoonAndNight','max','addEventListener','#003087','</td>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<td\x20class=\x22border\x20p-3\x22>','setFontSize','random','getElementById','&amp;','morningAndAfternoon','afternoon','&#039;','https://wa.me/27660688265','</td>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<td\x20class=\x22border\x20p-3\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22deleteExam(','Weekly\x20Exam\x20Study\x20Timetable','19:30-21:30','androidLink','trim','style','morningAndNight','PDF\x20Generated','jspdf','17:00-19:00','setFillColor','jsPDF','yearMark','Recommended\x20Study\x20Time:\x20Morning\x20(early\x20productivity)','success','iphoneLink','Hacking\x20is\x20just\x20typing.\x20–\x20TGA','desiredMark','No\x20exams\x20added.\x20Please\x20add\x20at\x20least\x20one\x20exam.','from','It\x20always\x20seems\x20impossible\x20until\x20it’s\x20done.\x20–\x20Nelson\x20Mandela','size','splice','Your\x20education\x20is\x20a\x20dress\x20rehearsal\x20for\x20a\x20life\x20that\x20is\x20yours\x20to\x20lead.\x20–\x20Nora\x20Ephron','setFont','includes','Morning','none','display','examDate','_blank','09:30-11:30','reduce','setTextColor','67dHtPEc','Afternoon','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<td\x20class=\x22border\x20p-3\x22>','Sessions/Week','toString','add','An\x20error\x20occurred\x20while\x20generating\x20the\x20PDF.\x20Please\x20try\x20again.','Hours/Week','22:00-00:00','Time','3199532WQNVBc','fire','addImage','https://www.ul.ac.za/wp-content/uploads/2023/10/university-of-limpopo-logo.png','innerHTML','PNG','07:00-09:00','short','getItem','recommendation','Exam\x20Deleted','anytime','inline-flex','studyTime','78039iSBtWg','floor','Africa/Johannesburg','appendChild','userAgent','splitTextToSize','Learning\x20is\x20a\x20treasure\x20that\x20will\x20follow\x20its\x20owner\x20everywhere.\x20–\x20Chinese\x20Proverb','center','animate__animated\x20animate__fadeIn','possible','en-ZA','ceil','rect','Education\x20is\x20the\x20most\x20powerful\x20weapon\x20which\x20you\x20can\x20use\x20to\x20change\x20the\x20world.\x20–\x20Nelson\x20Mandela','line','Generated\x20by\x20','forEach','textContent','14:30-16:30','has','Mon','&lt;','length','Please\x20fill\x20all\x20fields\x20correctly.\x20Year\x20Mark\x20and\x20Desired\x20Final\x20Mark\x20must\x20be\x20between\x200\x20and\x20100.','error','weekly_exam_timetable.pdf','\x20on\x20','Time\x20Slot\x20Key','lateNight','module','save','Exam\x20Added','setItem','test','replace','map','12:00-14:00','PDF\x20generation\x20error:','Fri','Failed\x20to\x20load\x20PDF\x20library.\x20Please\x20try\x20again\x20later.','fromCharCode','text','The\x20only\x20way\x20to\x20do\x20great\x20work\x20is\x20to\x20love\x20what\x20you\x20do.\x20–\x20Steve\x20Jobs','value','The\x20beautiful\x20thing\x20about\x20learning\x20is\x20that\x20no\x20one\x20can\x20take\x20it\x20away\x20from\x20you.\x20–\x20B.B.\x20King','2992212mhrhmw'];_0x5ed3=function(){return _0xe476ce;};return _0x5ed3();}function contactDokodela(){const _0x56a4e5=_0x4799;window[_0x56a4e5(0xc1)](_0x56a4e5(0xd0),_0x56a4e5(0xef));}document[_0x1b903f(0xc6)]('DOMContentLoaded',()=>{const _0x357fd7=_0x1b903f,_0x3c44d4=localStorage[_0x357fd7(0x105)](_0x357fd7(0x10a));_0x3c44d4&&(document['getElementById'](_0x357fd7(0x10a))['value']=_0x3c44d4),recommendStudyTime(),adjustAppLinks();});
     </script>
 </body>
 </html>
