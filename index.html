@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Timetable Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+            font-family: 'Arial', sans-serif;
+        }
+        .madrid-title {
+            color: #003087;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .madrid-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .madrid-table th, .madrid-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            text-align: center;
+        }
+        .madrid-table th {
+            background: #003087;
+            color: white;
+            font-weight: bold;
+        }
+        .madrid-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        .madrid-table tr:hover {
+            background: #e5e7eb;
+            transition: background 0.3s;
+        }
+        .recommendation {
+            margin-top: 0.5rem;
+            color: #1f2937;
+            font-weight: 500;
+            background: #eff6ff;
+            padding: 8px;
+            border-radius: 8px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #003087;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .logo {
+            max-width: 120px;
+            height: auto;
+        }
+        .header-bg {
+            background: linear-gradient(to right, #003087, #0052cc);
+        }
+        .footer-bg {
+            background: linear-gradient(to right, #003087, #0052cc);
+        }
+        .card {
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .swal2-popup {
+            font-family: 'Arial', sans-serif;
+            font-size: 14px !important;
+        }
+        .swal2-confirm {
+            background-color: #003087 !important;
+        }
+        /* Responsive Styles */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 640px) {
+            .madrid-title {
+                font-size: 1.5rem;
+            }
+            .madrid-table th, .madrid-table td {
+                font-size: 0.75rem;
+                padding: 6px;
+            }
+            .container {
+                padding: 1rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .logo {
+                max-width: 100px;
+            }
+            input, select, button {
+                font-size: 0.875rem;
+                padding: 0.5rem;
+            }
+            .recommendation {
+                font-size: 0.875rem;
+                padding: 6px;
+            }
+            .swal2-popup {
+                width: 90% !important;
+                font-size: 12px !important;
+            }
+        }
+        @media (max-width: 400px) {
+            .madrid-title {
+                font-size: 1.25rem;
+            }
+            .madrid-table th, .madrid-table td {
+                font-size: 0.7rem;
+                padding: 4px;
+            }
+            .logo {
+                max-width: 80px;
+            }
+            input, select, button {
+                font-size: 0.8rem;
+                padding: 0.4rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div id="loader" class="loader"></div>
+    <header class="header-bg text-white p-4 shadow-md">
+        <div class="logo-container animate__animated animate__fadeIn">
+            <img src="https://www.ul.ac.za/images/ul_logo.png" alt="University of Limpopo Logo" class="logo">
+        </div>
+    </header>
+
+    <div class="container mx-auto p-6">
+        <div class="bg-white p-8 rounded-lg shadow-lg mb-8 card animate__animated animate__fadeInUp">
+            <h1 class="text-4xl font-bold text-center mb-8 madrid-title sm:text-3xl">Exam Timetable Generator</h1>
+
+            <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 card animate__animated animate__fadeInUp animate__delay-1s">
+                <h2 class="text-2xl font-semibold text-blue-700 mb-4 sm:text-xl">Your Name</h2>
+                <input id="studentName" type="text" placeholder="Enter your name" class="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 card animate__animated animate__fadeInUp animate__delay-2s">
+                <h2 class="text-2xl font-semibold text-blue-700 mb-4 sm:text-xl">Preferred Study Time</h2>
+                <select id="studyTime" class="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="saveStudyTime()">
+                    <option value="morning">Morning</option>
+                    <option value="afternoon">Afternoon</option>
+                    <option value="lateNight">Late Night</option>
+                    <option value="morningAndAfternoon">Morning and Afternoon</option>
+                    <option value="morningAndNight">Morning and Night</option>
+                    <option value="afternoonAndNight">Afternoon and Night</option>
+                    <option value="anytime">Anytime</option>
+                </select>
+                <div id="recommendation" class="recommendation"></div>
+            </div>
+
+            <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 card animate__animated animate__fadeInUp animate__delay-3s">
+                <h2 class="text-2xl font-semibold text-blue-700 mb-4 sm:text-xl">Add Exam</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <input id="module" type="text" placeholder="Module Code" class="border border-blue-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input id="examDate" type="date" class="border border-blue-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input id="yearMark" type="number" placeholder="Year Mark (0-100)" class="border border-blue-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input id="desiredMark" type="number" placeholder="Desired Final Mark (0-100)" class="border border-blue-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button onclick="addExam()" class="mt-4 bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition animate__animated animate__pulse animate__infinite w-full sm:w-auto">Add Exam</button>
+            </div>
+
+            <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 card animate__animated animate__fadeInUp animate__delay-4s">
+                <h2 class="text-2xl font-semibold text-blue-700 mb-4 sm:text-xl">Exam List</h2>
+                <div class="table-container">
+                    <table id="examTable" class="madrid-table">
+                        <thead>
+                            <tr>
+                                <th>Module Code</th>
+                                <th>Exam Date</th>
+                                <th>Year Mark</th>
+                                <th>Desired Final Mark</th>
+                                <th>Required Exam Mark</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="examTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button onclick="generatePDFWithLoader()" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition animate__animated animate__pulse animate__infinite w-full sm:w-auto">Generate Timetable PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-bg text-white text-center p-4 mt-8">
+        <p>Enhanced by TGA. Originally created by Dokodela, Mr Chauke.</p>
+        <p>For more information, contact Dokodela, Mr Chauke via WhatsApp at <a href="https://wa.me/27660688265" class="underline hover:text-blue-300">+27 66 068 8265</a>.</p>
+    </footer>
+
+    <script>
+        let exams = [];
+
+        function addExam() {
+            const module = document.getElementById('module').value.trim();
+            const examDate = document.getElementById('examDate').value;
+            const yearMark = parseFloat(document.getElementById('yearMark').value);
+            const desiredMark = parseFloat(document.getElementById('desiredMark').value);
+            const studyTime = document.getElementById('studyTime').value;
+
+            if (!module || !examDate || isNaN(yearMark) || yearMark < 0 || yearMark > 100 || 
+                isNaN(desiredMark) || desiredMark < 0 || desiredMark > 100) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Input',
+                    text: 'Please fill all fields correctly. Year Mark and Desired Final Mark must be between 0 and 100.',
+                    confirmButtonColor: '#003087'
+                });
+                return;
+            }
+
+            exams.push({ module, examDate, yearMark, desiredMark });
+            localStorage.setItem('studyTime', studyTime);
+            recommendStudyTime();
+            updateTable();
+            clearForm();
+            Swal.fire({
+                icon: 'success',
+                title: 'Exam Added',
+                text: 'Exam has been successfully added!',
+                confirmButtonColor: '#003087',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('module').value = '';
+            document.getElementById('examDate').value = '';
+            document.getElementById('yearMark').value = '';
+            document.getElementById('desiredMark').value = '';
+        }
+
+        function calculateRequiredExamMark(yearMark, desiredMark) {
+            let required = (desiredMark - (yearMark * 0.60)) / 0.40;
+            required = Math.max(required, 40);
+            const totalMark = (yearMark * 0.60) + (required * 0.40);
+            if (totalMark < desiredMark) {
+                return { value: required, possible: false };
+            }
+            return { value: Math.ceil(required), possible: true };
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('examTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            exams.forEach((exam, index) => {
+                const result = calculateRequiredExamMark(exam.yearMark, exam.desiredMark);
+                const requiredMark = result.value;
+                const isPossible = result.possible;
+                const row = document.createElement('tr');
+                row.className = 'animate__animated animate__fadeIn';
+                row.innerHTML = `
+                    <td class="border p-3">${exam.module}</td>
+                    <td class="border p-3">${exam.examDate}</td>
+                    <td class="border p-3">${exam.yearMark}</td>
+                    <td class="border p-3">${exam.desiredMark}</td>
+                    <td class="border p-3">${requiredMark}${!isPossible || requiredMark > 100 ? ' (Not Possible)' : ''}</td>
+                    <td class="border p-3">
+                        <button onclick="deleteExam(${index})" class="bg-red-500 text-white p-1 rounded hover:bg-red-600 text-sm">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function deleteExam(index) {
+            exams.splice(index, 1);
+            recommendStudyTime();
+            updateTable();
+            Swal.fire({
+                icon: 'success',
+                title: 'Exam Deleted',
+                text: 'Exam has been successfully removed!',
+                confirmButtonColor: '#003087',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        function saveStudyTime() {
+            const studyTime = document.getElementById('studyTime').value;
+            localStorage.setItem('studyTime', studyTime);
+            recommendStudyTime();
+            Swal.fire({
+                icon: 'success',
+                title: 'Study Time Saved',
+                text: 'Preferred study time has been saved!',
+                confirmButtonColor: '#003087',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        function recommendStudyTime() {
+            if (exams.length === 0) {
+                document.getElementById('recommendation').textContent = '';
+                return;
+            }
+
+            const avgYearMark = exams.reduce((sum, exam) => sum + exam.yearMark, 0) / exams.length;
+            const moduleCount = exams.length;
+
+            let recommendation;
+            if (avgYearMark < 50 || moduleCount > 4) {
+                recommendation = "Recommended Study Time: Afternoon and Night (focused evening study)";
+            } else if (avgYearMark >= 70 || moduleCount <= 2) {
+                recommendation = "Recommended Study Time: Morning (early productivity)";
+            } else {
+                recommendation = "Recommended Study Time: Morning and Afternoon (balanced daytime study)";
+            }
+            document.getElementById('recommendation').textContent = recommendation;
+
+            if (!localStorage.getItem('studyTime')) {
+                localStorage.setItem('studyTime', recommendation.includes('Morning') ? 
+                    (recommendation.includes('Afternoon') ? 'morningAndAfternoon' : 'morning') : 
+                    (recommendation.includes('Night') ? 'afternoonAndNight' : 'afternoon'));
+                document.getElementById('studyTime').value = localStorage.getItem('studyTime');
+            }
+        }
+
+        function generatePDF() {
+            if (exams.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Exams',
+                    text: 'No exams added. Please add at least one exam.',
+                    confirmButtonColor: '#003087'
+                });
+                return;
+            }
+
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'PDF Library Error',
+                    text: 'Failed to load PDF library. Please try again later.',
+                    confirmButtonColor: '#003087'
+                });
+                return;
+            }
+
+            let studentName = document.getElementById('studentName').value.trim();
+            if (!studentName) studentName = "Student";
+
+            const studyTime = localStorage.getItem('studyTime') || 'morning';
+            let timeSlots;
+            const allTimeSlots = ["07:00-09:00", "09:30-11:30", "12:00-14:00", "14:30-16:30", "17:00-19:00", "19:30-21:30", "22:00-00:00"];
+            switch (studyTime) {
+                case 'morning':
+                    timeSlots = ["07:00-09:00", "09:30-11:30"];
+                    break;
+                case 'afternoon':
+                    timeSlots = ["12:00-14:00", "14:30-16:30"];
+                    break;
+                case 'lateNight':
+                    timeSlots = ["19:30-21:30", "22:00-00:00"];
+                    break;
+                case 'morningAndAfternoon':
+                    timeSlots = ["07:00-09:00", "09:30-11:30", "12:00-14:00", "14:30-16:30"];
+                    break;
+                case 'morningAndNight':
+                    timeSlots = ["07:00-09:00", "09:30-11:30", "19:30-21:30", "22:00-00:00"];
+                    break;
+                case 'afternoonAndNight':
+                    timeSlots = ["12:00-14:00", "14:30-16:30", "19:30-21:30", "22:00-00:00"];
+                    break;
+                case 'anytime':
+                    timeSlots = allTimeSlots;
+                    break;
+                default:
+                    timeSlots = ["07:00-09:00", "09:30-11:30"];
+            }
+
+            const timeSlotMap = {};
+            timeSlots.forEach((slot, index) => {
+                const letter = String.fromCharCode(65 + index);
+                timeSlotMap[slot] = letter;
+            });
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("times", "normal");
+            doc.setFontSize(16);
+            doc.setTextColor(0, 51, 102);
+            doc.setFillColor(219, 234, 254);
+            doc.rect(10, 10, 190, 20, "F");
+            doc.text("Weekly Exam Study Timetable", 105, 25, { align: "center" });
+
+            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            doc.setFontSize(14);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(10, 40, 190, 12, "F");
+            doc.setTextColor(0, 0, 0);
+            doc.text("Time", 12, 48);
+            const colWidth = 26;
+            days.forEach((day, i) => {
+                doc.text(day, 30 + i * colWidth, 48);
+            });
+
+            let timetable = {};
+            let modulesPerDay = {};
+            let sessionsPerModule = {};
+            exams.forEach(exam => {
+                sessionsPerModule[exam.module] = 0;
+            });
+            days.forEach(day => {
+                modulesPerDay[day] = new Set();
+                timeSlots.forEach(time => {
+                    if (!timetable[time]) timetable[time] = {};
+                    timetable[time][day] = "";
+                });
+            });
+
+            exams.forEach(exam => {
+                for (let i = 0; i < 4; i++) {
+                    let assigned = false;
+                    let attempts = 0;
+                    const maxAttempts = 50;
+                    while (!assigned && attempts < maxAttempts) {
+                        const day = days[Math.floor(Math.random() * days.length)];
+                        const time = timeSlots[Math.floor(Math.random() * timeSlots.length)];
+                        if (!timetable[time][day] && !modulesPerDay[day].has(exam.module)) {
+                            timetable[time][day] = exam.module;
+                            modulesPerDay[day].add(exam.module);
+                            sessionsPerModule[exam.module]++;
+                            assigned = true;
+                        }
+                        attempts++;
+                    }
+                }
+                for (let i = 0; i < 3; i++) {
+                    let assigned = false;
+                    let attempts = 0;
+                    const maxAttempts = 50;
+                    while (!assigned && attempts < maxAttempts) {
+                        const day = days[Math.floor(Math.random() * days.length)];
+                        const time = timeSlots[Math.floor(Math.random() * timeSlots.length)];
+                        if (!timetable[time][day] && !modulesPerDay[day].has(exam.module)) {
+                            timetable[time][day] = exam.module;
+                            modulesPerDay[day].add(exam.module);
+                            sessionsPerModule[exam.module]++;
+                            assignedcomputationally expensive but necessary for security reasons, I'll include it to ensure the module name is properly escaped.
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            days.forEach(day => {
+                if (modulesPerDay[day].size < 2 && exams.length >= 2) {
+                    let additionalModules = new Set([...exams].map(ex => ex.module));
+                    modulesPerDay[day].forEach(mod => additionalModules.delete(mod));
+                    const additionalModulesArray = Array.from(additionalModules);
+                    let modulesToAdd = 2 - modulesPerDay[day].size;
+                    for (let i = 0; i < modulesToAdd && i < additionalModulesArray.length; i++) {
+                        let assigned = false;
+                        let attempts = 0;
+                        const maxAttempts = 50;
+                        while (!assigned && attempts < maxAttempts) {
+                            const time = timeSlots[Math.floor(Math.random() * timeSlots.length)];
+                            if (!timetable[time][day] && !modulesPerDay[day].has(additionalModulesArray[i])) {
+                                timetable[time][day] = additionalModulesArray[i];
+                                modulesPerDay[day].add(additionalModulesArray[i]);
+                                sessionsPerModule[additionalModulesArray[i]]++;
+                                assigned = true;
+                            }
+                            attempts++;
+                        }
+                    }
+                }
+            });
+
+            let y = 52;
+            timeSlots.forEach(time => {
+                const letter = timeSlotMap[time];
+                doc.setFillColor(255, 255, 255);
+                doc.rect(10, y, 190, 14, "F");
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(14);
+                doc.text(letter, 12, y + 10);
+                days.forEach((day, i) => {
+                    const text = timetable[time][day];
+                    if (text) {
+                        doc.setFillColor(240, 240, 240);
+                        doc.rect(30 + i * colWidth - 2, y, colWidth, 14, "F");
+                        const wrappedText = doc.splitTextToSize(text, colWidth - 4);
+                        doc.text(wrappedText, 30 + i * colWidth, y + 10, { maxWidth: colWidth - 4 });
+                    }
+                    doc.setDrawColor(0, 0, 0);
+                    doc.rect(30 + i * colWidth - 2, y, colWidth, 14);
+                });
+                doc.setDrawColor(0, 0, 0);
+                doc.rect(10, y, 190, 14);
+                y += 14;
+            });
+
+            const quotes = [
+                "Success is the sum of small efforts, repeated day in and day out. – Robert Collier",
+                "The future belongs to those who believe in the beauty of their dreams. – Eleanor Roosevelt",
+                "It always seems impossible until it’s done. – Nelson Mandela",
+                "You don’t have to be great to start, but you have to start to be great. – Zig Ziglar",
+                "The only way to do great work is to love what you do. – Steve Jobs"
+            ];
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            y += 10;
+            doc.setFontSize(12);
+            doc.setTextColor(0, 51, 102);
+            const quoteLines = doc.splitTextToSize(randomQuote, 180);
+            quoteLines.forEach((line, index) => {
+                doc.text(line, 105, y + (index * 5), { align: "center" });
+            });
+            y += quoteLines.length * 5 + 10;
+
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(14);
+            doc.text("Time Slot Key", 105, y, { align: "center" });
+            y += 10;
+
+            doc.setFontSize(12);
+            doc.setTextColor(0, 51, 102);
+            timeSlots.forEach(time => {
+                const letter = timeSlotMap[time];
+                doc.text(`${letter}: ${time}`, 105, y, { align: "center" });
+                y += 6;
+            });
+
+            y += 5;
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(14);
+            doc.text("Module Summary", 105, y, { align: "center" });
+            y += 10;
+
+            doc.setFillColor(219, 234, 254);
+            doc.rect(10, y, 190, 8, "F");
+            doc.setFontSize(12);
+            doc.setTextColor(0, 51, 102);
+            doc.text("Module", 12, y + 6);
+            doc.text("Sessions/Week", 50, y + 6);
+            doc.text("Hours/Week", 90, y + 6);
+            doc.text("Exam Date", 130, y + 6);
+            y += 8;
+
+            doc.setTextColor(0, 0, 0);
+            exams.forEach(exam => {
+                const sessions = sessionsPerModule[exam.module] || 0;
+                const hours = sessions * 2;
+                doc.setFillColor(240, 240, 240);
+                doc.rect(10, y, 190, 8, "F");
+                doc.text(exam.module, 12, y + 6);
+                doc.text(sessions.toString(), 50, y + 6);
+                doc.text(hours.toString(), 90, y + 6);
+                doc.text(exam.examDate, 130, y + 6);
+                doc.rect(10, y, 190, 8);
+                doc.line(48, y, 48, y + 8);
+                doc.line(88, y, 88, y + 8);
+                doc.line(128, y, 128, y + 8);
+                y += 8;
+            });
+
+            y += 10;
+            doc.setFontSize(12);
+            const currentDate = new Date().toLocaleString("en-ZA", { timeZone: "Africa/Johannesburg", dateStyle: "full", timeStyle: "short" });
+            doc.text(`Generated by ${studentName} on ${currentDate}`, 105, y, { align: "center" });
+
+            doc.save("weekly_exam_timetable.pdf");
+            Swal.fire({
+                icon: 'success',
+                title: 'PDF Generated',
+                text: 'Your timetable has been successfully generated and downloaded!',
+                confirmButtonColor: '#003087',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        function generatePDFWithLoader() {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'block';
+            setTimeout(() => {
+                try {
+                    generatePDF();
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'PDF Generation Failed',
+                        text: 'An error occurred while generating the PDF. Please try again.',
+                        confirmButtonColor: '#003087'
+                    });
+                    console.error('PDF generation error:', error);
+                }
+                loader.style.display = 'none';
+            }, 1000);
+        }
+
+        function contactDokodela() {
+            window.open('https://wa.me/27660688265', '_blank');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedStudyTime = localStorage.getItem('studyTime');
+            if (savedStudyTime) {
+                document.getElementById('studyTime').value = savedStudyTime;
+            }
+            recommendStudyTime();
+        });
+    </script>
+</body>
+</html>
